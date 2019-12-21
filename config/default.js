@@ -11,7 +11,7 @@
 'use strict';
 
 module.exports = {
-	url: 'mongodb://localhost:27017/music',
+	url: 'mongodb://localhost:27017/db_elm',
 	port: parseInt(process.env.PORT, 10) || 8001,
 	session: {
 		name: 'SID',
@@ -29,5 +29,10 @@ module.exports = {
 			user:'2994230021@qq.com',
 			pass:'mpynxvrmxluzdeag'
 		}
+	},
+	zhenzi:{
+		AppId:'103847',
+		AppSecret:'1c0a4f50-8f2f-4e21-869e-e1d5f3fdc2a2',
+		ApiUrl:'sms_developer.zhenzikj.com'
 	}
 }
