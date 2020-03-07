@@ -1,5 +1,5 @@
-var mongoose = require('mongoose')
-var Scheme = mongoose.Schema
+var mongoose = require('mongoose');
+var Scheme = mongoose.Schema;
 
 var userModels = new Scheme({
   id: Scheme.Types.ObjectId, //id
@@ -24,5 +24,5 @@ var userModels = new Scheme({
     avatarUrl: String,
     nick: String
   } //微信信息
-})
-module.exports = mongoose.model('userModel', userModels)
+});
+module.exports = mongoose.model('userModel', userModels);

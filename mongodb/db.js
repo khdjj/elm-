@@ -35,8 +35,8 @@ db.on('close', function() {
 
 const data_source = {}
 
-data_source.openDataSource = function() {
-  mongoose.connect(config.url, {
+data_source.openDataSource = async  function() {
+ await mongoose.connect(config.url, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false
