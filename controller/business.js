@@ -1,11 +1,11 @@
 const chalk = require('chalk'),
-  userDao = require('../dao/user'),
+  businessDao = require('../dao/business'),
   util = require('../service/utils'),
-  uuid = require('../service/getUUID'),
+  getUser = require('../service/getUser'),
   dataEncPro = require('../service/encData'),
   ZhenzismsClient = require('../service/zhenzisms'),
   config = require('../config/default');
-class User {
+class Business {
   constructor() {
     this.getCode = this.getCode.bind(this);
     this.bindAccount = this.bindAccount.bind(this);
@@ -16,7 +16,7 @@ class User {
       isValid = true,
       errcode = 400;
 
-    if (!util.phoneisValid(phone)) {
+    if (!phone || !util.phoneisValid(phone)) {
       errcode = 4001;
       errMsg = '手机号格式错误';
       isValid = false;
@@ -24,7 +24,6 @@ class User {
     console.error(phone);
     const cretime = Number(new Date());
     const code = util.random();
-    let userId = uuid(8, 10);
     console.error(chalk.red(code));
     //发送短信
     // let client = new ZhenzismsClient(
@@ -46,13 +45,21 @@ class User {
         msg: errMsg
       });
     } else {
-      userDao
-        .saveCode(phone, code, cretime, userId)
+      businessDao
+        .saveCode(phone, code, cretime)
         .then(doc => {
-          res.send({
-            ret: 1,
-            code: 200
-          });
+          console.error(doc);
+          if (doc.error) {
+            res.send({
+              error: doc.error,
+              msg: doc.msg
+            });
+          } else {
+            res.send({
+              ret: 1,
+              code: 200
+            });
+          }
         })
         .catch(err => {
           res.send({
@@ -65,22 +72,21 @@ class User {
   }
   async bindAccount(req, res, next) {
     const { phone, code } = req.body;
-    console.error(phone, code);
     const currTime = Number(new Date());
     let msg = '验证成功';
     let sendCode = 200;
     let ret = 1;
-    if (!phone) {
+    if (!phone || !util.phoneisValid(phone)) {
       res.send({
         error: 4001,
         code: 500,
         msg: '参数格式错误'
       });
     }
-    userDao
+    businessDao
       .searchByPhone(phone)
       .then(doc => {
-        const { codeSendTime, code: dbcode } = doc;
+        const { codeSendTime, code: dbcode, password: dbpassword } = doc;
         if (dbcode && dbcode != code) {
           msg = '对不起，验证码错误，请重试';
           ret = 0;
@@ -120,10 +126,86 @@ class User {
         });
       });
   }
+
+  async login(req, res, next) {
+    const { phone, password } = req.body;
+    if (!phone || !util.phoneisValid(phone)) {
+      res.send({
+        error: 4001,
+        code: 500,
+        msg: '参数格式错误'
+      });
+    }
+    businessDao
+      .searchByPhone(phone)
+      .then(doc => {
+        if (!doc || Object.keys(phone).length === 0) {
+          res.send({
+            error: 4005,
+            code: 500,
+            msg: '对不起,该用户不存在'
+          });
+        } else if (doc.password !== password) {
+          res.send({
+            error: 4006,
+            code: 500,
+            msg: '无效密码'
+          });
+        } else {
+          res.send({
+            msg: '登录成功',
+            ret: 1,
+            userInfo: {
+              phone: doc.phone,
+              role: doc.role
+            },
+            token: dataEncPro.encData(JSON.stringify({ _id: doc._id }))
+          });
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        res.send({
+          error: 5001,
+          msg: '对不起，服务器错误，请重试',
+          ret: 0
+        });
+      });
+  }
+
+  async modifyPassword(req, res, next) {
+    const { opassword, npassword } = req.body;
+    const _id = getUser.getId(req);
+    console.error(req.body)
+    businessDao
+      .searchPassword(_id, opassword, npassword)
+      .then(doc => {
+        console.error('doc', doc);
+        if (doc.error) {
+          res.send({
+            ...doc
+          });
+        } else {
+          res.send({
+            ret: 1,
+            code: 200
+          });
+        }
+      })
+      .catch(err => {
+        res.send({
+          error: 5001,
+          msg: '对不起，服务器错误，请重试',
+          ret: 0
+        });
+      });
+  }
 }
 
-const user = new User();
+const business = new Business();
 module.exports = {
-  getCode: user.getCode,
-  bindAccount: user.bindAccount
+  getCode: business.getCode,
+  bindAccount: business.bindAccount,
+  login: business.login,
+  modifyPassword: business.modifyPassword
 };

@@ -1,10 +1,13 @@
 const chalk = require('chalk'),
   utils = require('../service/utils'),
+  getUser = require('../service/getUser'),
+  restDao = require('../dao/restaurant'),
   spider = require('../spider/index');
 class Restaurant {
   constructor() {
     this.getRestaurant = this.getRestaurant.bind(this);
     this.getShopDetail = this.getShopDetail.bind(this);
+    this.saveRestaruant = this.saveRestaruant.bind(this);
   }
   async getRestaurant(req, res, next) {
     const {
@@ -79,10 +82,27 @@ class Restaurant {
         });
       });
   }
+
+  saveRestaruant(req, res, next) {
+    const _id = getUser.getId(req);
+    restDao.saveRestaurant(_id, req.body).then(doc => {
+      if (doc.error) {
+        res.send({
+          ...doc
+        });
+      } else {
+        res.send({
+          ret: 1,
+          code: 200
+        });
+      }
+    });
+  }
 }
 
 const restaurant = new Restaurant();
 module.exports = {
   getRestaurant: restaurant.getRestaurant,
-  getShopDetail: restaurant.getShopDetail
+  getShopDetail: restaurant.getShopDetail,
+  saveRestaruant: restaurant.saveRestaruant
 };

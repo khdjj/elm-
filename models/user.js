@@ -14,6 +14,7 @@ var userModels = new Scheme({
   city: String, //城市
   country: String, //国家
   token: String,
+  userId:String,
   weapp: {
     nickName: String,
     gender: String,

@@ -1,7 +1,15 @@
 let routerUser = require('./user'),
-    routerRestaurant = require('./restaurant')
+  routerAddress = require('./address'),
+  routerOrder = require('./order'),
+  routerBusiness = require('./business'),
+  routerUpload = require('./upload'),
+  routerRestaurant = require('./restaurant');
 
-exports.routes = app=>{
-    app.use('/user',routerUser.router);
-    app.use('/restapi',routerRestaurant.router);
-}
+exports.routes = app => {
+  app.use('/user', routerUser.router);
+  app.use('/restapi', routerRestaurant.router);
+  app.use('/address', routerAddress.router);
+  app.use('/order', routerOrder.router);
+  app.use('/business', routerBusiness.router);
+  app.use('/upload', routerUpload.router);
+};

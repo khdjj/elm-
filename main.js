@@ -11,17 +11,13 @@ const app = express();
 app.use(cookParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.all('*', (req, res, next) => {
-  const { origin, Origin, referer, Referer } = req.headers;
-  const allowOrigin = origin || Origin || referer || Referer || '*';
-  res.header('Access-Control-Allow-Origin', '*'); //Access-Control-Allow-Origin 解决跨域请求
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, X-Requested-With'
-  ); //Access-Control-Allow-Headers  表明它允许跨域请求包含content-type头
-  res.header('Access-Control-Allow-Methods', 'PUT,POST,GET,DELETE,OPTIONS'); //表明它允许GET、PUT、DELETE的外域请求
-  res.header('Access-Control-Allow-Credentials', true); //可以带cookies
-  res.header('X-Powered-By', 'Express');
+app.all('*', function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "*");
+  res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
+  res.header("X-Powered-By",' 3.2.1')
+  res.header('Access-Control-Allow-Credentials',true);
+  res.header("Content-Type", "application/json;charset=utf-8");
   next();
 });
 router.routes(app);
