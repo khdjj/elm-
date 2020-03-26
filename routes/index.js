@@ -3,6 +3,7 @@ let routerUser = require('./user'),
   routerOrder = require('./order'),
   routerBusiness = require('./business'),
   routerUpload = require('./upload'),
+  routerFood = require('./food'),
   routerRestaurant = require('./restaurant');
 
 exports.routes = app => {
@@ -12,4 +13,6 @@ exports.routes = app => {
   app.use('/order', routerOrder.router);
   app.use('/business', routerBusiness.router);
   app.use('/upload', routerUpload.router);
+  app.use('/food', routerFood.router);
+
 };

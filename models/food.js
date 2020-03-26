@@ -23,7 +23,6 @@ const foodSchema = new Schema({
     image_path: String,
     is_essential: Boolean,
     is_featured:  Number,
-    item_id: {type:String,index:true},
     join_hot: Boolean,
     limitation: Schema.Types.Mixed,
     lowest_price: Number,

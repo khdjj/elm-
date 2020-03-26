@@ -46,6 +46,8 @@ const RestaurantSchema = new Schema({
   albums: Array, //店内照片
   next_business_time: String,
   opening_hours: Array, //开放时间
+  startTime:String, //自定义开放时间
+  endTime:String,//自定义结束时间
   order_lead_time: Number, //订单送达时间
   out_of_range: Boolean,
   phone: Schema.Types.String, //商家电话
@@ -63,6 +65,7 @@ const RestaurantSchema = new Schema({
     tips: String
   },
   platform: Number,
+  category:Array,//食品分类
   posters: Array,
   promotion_info: String, //公告
   qualification: Array, //营业资质
@@ -74,6 +77,7 @@ const RestaurantSchema = new Schema({
   status: Number,
   target_tag_path: Schema.Types.Mixed,
   type: Number,
+  createAt:Schema.Types.Date,
   businessId: { type: Schema.Types.ObjectId, ref: 'businessModels' } //这里即为子表的外键，关联主表。  ref后的blog代表的是主表blog的Model。
 });
 
