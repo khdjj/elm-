@@ -10,28 +10,11 @@ class Restaurant {
     this.saveRestaruant = this.saveRestaruant.bind(this);
     this.getRestaurantList = this.getRestaurantList.bind(this);
     this.addRestaurantCategory = this.addRestaurantCategory.bind(this);
+    this.getRestaurantDetail = this.getRestaurantDetail.bind(this);
   }
   async getRestaurant(req, res, next) {
-    const {
-      latitude,
-      longitude,
-      offset = 0,
-      limit = 10,
-      extras,
-      extra_filters,
-      rank_id
-    } = req.body;
-    spider.rst
-      .getRestaurant({
-        latitude,
-        longitude,
-        offset,
-        'extras[]': extras,
-        limit,
-        extra_filters,
-        rank_id,
-        terminal: 'h5'
-      })
+    restDao
+      .getRestaurantListByParams(req.body)
       .then((data = {}) => {
         res.send({
           code: 200,
@@ -39,6 +22,7 @@ class Restaurant {
         });
       })
       .catch(err => {
+        console.error(err)
         res.send({
           error: 4004,
           message: '数据查询错误,请重试'
@@ -106,7 +90,6 @@ class Restaurant {
     restDao
       .getRestaurantList(_id)
       .then(doc => {
-        console.error('doc', doc);
         res.send({
           ret: 1,
           data: doc
@@ -140,6 +123,45 @@ class Restaurant {
         });
       });
   }
+
+  getRestaurantDetail(req, res, next) {
+    const { id } = req.query;
+    restDao
+      .getRestaurantDetail(id)
+      .then(doc => {
+        res.send({
+          ret: 1,
+          data: doc
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        res.send({
+          error: 4004,
+          msg: err
+        });
+      });
+  }
+
+  updateRestaurant(req, res, next) {
+    const { id, ...restData } = req.body;
+
+    restDao
+      .updateRestaurant(id, restData)
+      .then(doc => {
+        res.send({
+          ret: 1,
+          data: doc
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        res.send({
+          error: 4004,
+          msg: err
+        });
+      });
+  }
 }
 
 const restaurant = new Restaurant();
@@ -148,5 +170,7 @@ module.exports = {
   getShopDetail: restaurant.getShopDetail,
   saveRestaruant: restaurant.saveRestaruant,
   getRestaurantList: restaurant.getRestaurantList,
-  addRestaurantCategory: restaurant.addRestaurantCategory
+  addRestaurantCategory: restaurant.addRestaurantCategory,
+  getRestaurantDetail: restaurant.getRestaurantDetail,
+  updateRestaurant: restaurant.updateRestaurant
 };

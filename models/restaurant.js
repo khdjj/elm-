@@ -20,6 +20,7 @@ const RestaurantSchema = new Schema({
   closing_count_down: Number,
   text_color: String,
   tips: String,
+  location:Schema.Types.Mixed,
   type: Number,
   delivery_mode: Schema.Types.Mixed,
   description: String, //描述

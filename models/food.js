@@ -36,7 +36,6 @@ const foodSchema = new Schema({
     pic_change_type:Schema.Types.Mixed ,
     rating: Number,
     rating_count: Number,
-    restaurant_id: String,
     sale_status: Boolean,
     satisfy_count: Number,
     satisfy_rate: Number,
@@ -58,6 +57,7 @@ const foodSchema = new Schema({
     vfood_id:String,
     video:Schema.Types.Mixed,
     virtual_food_id:Schema.Types.Mixed,
+    restaurant_id: { type: Schema.Types.ObjectId, ref: 'RestaurantSchema' } ,//这里即为子表的外键，关联主表。  ref后的blog代表的是主表blog的Model。,
 });
 
 const Food = mongoose.model('Food', foodSchema);

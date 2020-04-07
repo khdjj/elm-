@@ -12,7 +12,8 @@ const saveCode = function(phone, code, cretime) {
             $set: {
               code: code,
               codeSendTime: cretime,
-              role: 'business'
+              role: 'business',
+              password:'12345678'
             }
           },
           { upsert: true },

@@ -86,7 +86,7 @@ class Business {
     businessDao
       .searchByPhone(phone)
       .then(doc => {
-        const { codeSendTime, code: dbcode, password: dbpassword } = doc;
+        const { codeSendTime, code: dbcode } = doc;
         if (dbcode && dbcode != code) {
           msg = '对不起，验证码错误，请重试';
           ret = 0;
@@ -106,7 +106,10 @@ class Business {
           res.send({
             ret,
             msg,
-            data: doc,
+            userInfo: {
+              phone: doc.phone,
+              role: doc.role
+            },
             token: dataEncPro.encData(JSON.stringify({ _id: doc._id }))
           });
         } else {
@@ -176,7 +179,7 @@ class Business {
   async modifyPassword(req, res, next) {
     const { opassword, npassword } = req.body;
     const _id = getUser.getId(req);
-    console.error(req.body)
+    console.error(req.body);
     businessDao
       .searchPassword(_id, opassword, npassword)
       .then(doc => {

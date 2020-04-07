@@ -15,12 +15,13 @@ var userModels = new Scheme({
   country: String, //国家
   token: String,
   userId:String,
+  avatar:{type:String,default:''},
   weapp: {
     nickName: String,
     gender: String,
     language: String,
     city: String,
-    province: String,
+    province: String, 
     country: String,
     avatarUrl: String,
     nick: String
