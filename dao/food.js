@@ -1,6 +1,6 @@
 var FoodModel = require('../models/food');
 
-exports.save = async function(data) {
+exports.save = async function (data) {
   var food = new FoodModel({
     ...data
   });
@@ -16,20 +16,20 @@ exports.save = async function(data) {
   }
 };
 
-exports.updateFood = async function(id, data) {
-  console.error(id,data)
+exports.updateFood = async function (id, data) {
+  console.error(id, data);
   return new Promise((resolve, reject) => {
     FoodModel.updateOne(
       { _id: id },
       {
-        $set: { ...data },
+        $set: { ...data }
       },
       (err, doc) => {
         if (err) {
           reject(err);
           console.error('对不起，修改食品数据错误');
         } else {
-          console.error(doc)
+          console.error(doc);
           resolve(doc);
         }
       }
@@ -37,11 +37,14 @@ exports.updateFood = async function(id, data) {
   });
 };
 
+exports.findFoodByMenus = async function (foods) {
+  return await FoodModel.find({ _id: { $in: foods } });
+};
 
 //其他用途
-exports.getAll = function() {
+exports.getAll = function () {
   return new Promise((resolve, reject) => {
-    FoodModel.find({},(err, doc) => {
+    FoodModel.find({}, (err, doc) => {
       if (err) {
         reject(err);
         console.error('对不起，修改餐饮数据错误');
@@ -54,14 +57,14 @@ exports.getAll = function() {
 
 //其他用途
 
-exports.saveAll = function(data) {
+exports.saveAll = function (data) {
   return new Promise((resolve, reject) => {
-    FoodModel.insertMany(data,(err,doc)=>{
-      if(err){
+    FoodModel.insertMany(data, (err, doc) => {
+      if (err) {
         reject(err);
-      }else{
-        console.error("保存食品成功")
-        resolve(doc)
+      } else {
+        console.error('保存食品成功');
+        resolve(doc);
       }
     });
   });

@@ -11,8 +11,6 @@ var userModels = new Scheme({
   love: Array, //收藏
   crtime: String, //用户创建时间
   status: Number, //用户状态
-  city: String, //城市
-  country: String, //国家
   token: String,
   userId:String,
   avatar:{type:String,default:''},
@@ -24,7 +22,6 @@ var userModels = new Scheme({
     province: String, 
     country: String,
     avatarUrl: String,
-    nick: String
   } //微信信息
 });
 module.exports = mongoose.model('userModel', userModels);

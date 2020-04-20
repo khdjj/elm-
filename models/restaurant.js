@@ -20,7 +20,7 @@ const RestaurantSchema = new Schema({
   closing_count_down: Number,
   text_color: String,
   tips: String,
-  location:Schema.Types.Mixed,
+  location: Schema.Types.Mixed,
   type: Number,
   delivery_mode: Schema.Types.Mixed,
   description: String, //描述
@@ -35,7 +35,7 @@ const RestaurantSchema = new Schema({
   id: { type: String, index: true },
   image_path: String, //店logo
   is_new: Boolean,
-  recent_order_num: Number, //月销售量
+  recent_order_num: { type: Number, default: 0 }, //月销售量
   is_premium: Boolean,
   is_star: Boolean,
   is_stock_empty: Number,
@@ -47,8 +47,8 @@ const RestaurantSchema = new Schema({
   albums: Array, //店内照片
   next_business_time: String,
   opening_hours: Array, //开放时间
-  startTime:String, //自定义开放时间
-  endTime:String,//自定义结束时间
+  startTime: String, //自定义开放时间
+  endTime: String, //自定义结束时间
   order_lead_time: Number, //订单送达时间
   out_of_range: Boolean,
   phone: Schema.Types.String, //商家电话
@@ -66,19 +66,19 @@ const RestaurantSchema = new Schema({
     tips: String
   },
   platform: Number,
-  category:Array,//食品分类
+  category: Array, //食品分类
   posters: Array,
   promotion_info: String, //公告
   qualification: Array, //营业资质
-  rating: Number,
-  rating_count: Number,
+  rating: { type: Number, default: 0 },
+  rating_count: { type: Number, default: 0 },
   regular_customer_count: Number,
   restaurant_info: Schema.Types.Mixed,
   scheme: String,
   status: Number,
   target_tag_path: Schema.Types.Mixed,
   type: Number,
-  createAt:Schema.Types.Date,
+  createAt: Schema.Types.Date,
   businessId: { type: Schema.Types.ObjectId, ref: 'businessModels' } //这里即为子表的外键，关联主表。  ref后的blog代表的是主表blog的Model。
 });
 

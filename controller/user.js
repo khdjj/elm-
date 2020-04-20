@@ -2,6 +2,7 @@ const chalk = require('chalk'),
   userDao = require('../dao/user'),
   util = require('../service/utils'),
   uuid = require('../service/getUUID'),
+  getUser = require('../service/getUser'),
   dataEncPro = require('../service/encData'),
   ZhenzismsClient = require('../service/zhenzisms'),
   config = require('../config/default');
@@ -9,6 +10,8 @@ class User {
   constructor() {
     this.getCode = this.getCode.bind(this);
     this.bindAccount = this.bindAccount.bind(this);
+    this.saveUserInfo = this.saveUserInfo.bind(this);
+    this.getUserInfo = this.getUserInfo.bind(this);
   }
   async getCode(req, res, next) {
     const { phone } = req.body;
@@ -120,10 +123,51 @@ class User {
         });
       });
   }
+  async saveUserInfo(req, res, next) {
+    const _id = getUser.getId(req);
+    userDao
+      .saveUserInfo(_id, req.body)
+      .then(data => {
+        res.send({
+          code: 200,
+          ret: data
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        res.send({
+          code: 5001,
+          msg: '对不起，服务器错误,请重试',
+          ret: 0
+        });
+      });
+  }
+
+  async getUserInfo(req, res, next) {
+    const _id = getUser.getId(req);
+    userDao
+      .getUserInfo(_id)
+      .then(data => {
+        res.send({
+          code: 200,
+          ret: data
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        res.send({
+          code: 5001,
+          msg: '对不起，服务器错误,请重试',
+          ret: 0
+        });
+      });
+  }
 }
 
 const user = new User();
 module.exports = {
   getCode: user.getCode,
-  bindAccount: user.bindAccount
+  bindAccount: user.bindAccount,
+  saveUserInfo: user.saveUserInfo,
+  getUserInfo: user.getUserInfo
 };

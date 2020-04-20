@@ -1,6 +1,6 @@
 const userModel = require('../models/user');
 
-const saveCode = function(phone, code, cretime, userId) {
+const saveCode = function (phone, code, cretime, userId) {
   return new Promise((resolve, reject) => {
     userModel.updateOne(
       { phone: phone },
@@ -19,9 +19,9 @@ const saveCode = function(phone, code, cretime, userId) {
   });
 };
 
-const searchByPhone = function(phone) {
+const searchByPhone = function (phone) {
   return new Promise((resolve, reject) => {
-    userModel.findOne({ phone: phone }, function(err, doc) {
+    userModel.findOne({ phone: phone }, function (err, doc) {
       if (err) {
         console.error(err);
         reject(err);
@@ -33,7 +33,17 @@ const searchByPhone = function(phone) {
   });
 };
 
+const saveUserInfo = async function (id, data) {
+  return await userModel.updateOne({ _id: id }, { $set: { ...data } });
+};
+
+const getUserInfo = async function (id) {
+  return await userModel.findOne({ _id: id });
+};
+
 module.exports = {
   saveCode,
-  searchByPhone
+  searchByPhone,
+  saveUserInfo,
+  getUserInfo,
 };

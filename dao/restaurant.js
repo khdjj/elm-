@@ -1,4 +1,5 @@
 var RestModel = require('../models/restaurant'),
+  foodDao = require('./food'),
   MenuModel = require('../models/menu');
 
 exports.save = async function (data) {
@@ -28,7 +29,7 @@ exports.getRestaurantListByParams = async function (data) {
   } = data;
   const reg = new RegExp(search);
   const location = [Number(longitude), Number(latitude)];
-  console.error(location,Number(offset),Number(limit))
+  console.error(location, Number(offset), Number(limit));
   if (!search) {
     return await RestModel.find({
       location: {
@@ -114,6 +115,40 @@ exports.getRestaurantDetail = async function (id) {
   });
 };
 
+exports.getShopDetail = async function (name) {
+  const doc = await RestModel.aggregate([
+    { $match: { name: name } },
+    {
+      $lookup: {
+        from: 'menus',
+        localField: '_id',
+        foreignField: 'rstId',
+        as: 'menus'
+      }
+    }
+  ]);
+  let rst = {};
+  if (doc.length > 0) rst = doc[0];
+  const docMenus = [];
+  let docRst = {};
+  const { menus = [] } = rst;
+  for (let i = 0; i < menus.length; i++) {
+    const { foods } = menus[i];
+    const food = await foodDao.findFoodByMenus(foods);
+    docMenus.push({
+      ...menus[i],
+      foods: food
+    });
+  }
+  delete rst.menus;
+  docRst = rst;
+  console.error(docMenus);
+  return {
+    menus: docMenus,
+    rst: docRst
+  };
+};
+
 exports.updateRestaurant = async function (id, data) {
   return new Promise((resolve, reject) => {
     RestModel.updateOne(
@@ -180,13 +215,3 @@ exports.update = function (data) {
     );
   });
 };
-
-// db.getCollection('restaurants').find({
-//   location: {
-//     $nearSphere: {
-//       $geometry: { type: 'Point', coordinates: [113.454134, 22.567851] },
-//       $minDistance: 1000,
-//       $maxDistance: 5000
-//     }
-//   }
-// });

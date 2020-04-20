@@ -1,6 +1,6 @@
 var OrderModel = require('../models/order');
 
-exports.saveOrderModel = async function(data) {
+exports.saveOrderModel = async function (data) {
   var order = new OrderModel({
     ...data
   });
@@ -12,7 +12,7 @@ exports.saveOrderModel = async function(data) {
   }
 };
 
-exports.searchUserOrderByUserId = async function(id) {
+exports.searchUserOrderByUserId = async function (id) {
   return new Promise((resolve, reject) => {
     OrderModel.find({ userId: id }, (err, doc) => {
       if (err) {
@@ -23,4 +23,12 @@ exports.searchUserOrderByUserId = async function(id) {
       }
     });
   });
+};
+
+exports.changeOrderStatus = async function (id, status) {
+  return await OrderModel.updateOne({ _id: id }, { $set: { status } });
+};
+
+exports.getOrderDetail = async function (id) {
+  return await OrderModel.findOne({ _id: id });
 };

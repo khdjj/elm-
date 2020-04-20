@@ -22,49 +22,29 @@ class Restaurant {
         });
       })
       .catch(err => {
-        console.error(err)
+        console.error(err);
         res.send({
           error: 4004,
-          message: '数据查询错误,请重试'
+          msg: '数据查询错误,请重试'
         });
       });
   }
 
   async getShopDetail(req, res, next) {
-    const {
-      user_id,
-      latitude,
-      longitude,
-      offset = 0,
-      limit = 10,
-      extras
-    } = req.body;
-    if (utils.isEmpty(req.body)) {
-      res.send({
-        error: 4001,
-        message: '数据参数格式错误'
-      });
-    }
-    spider.menu
-      .getMenu({
-        user_id,
-        latitude,
-        longitude,
-        offset,
-        limit,
-        extras
-      })
+    const { name } = req.query;
+    restDao
+      .getShopDetail(name)
       .then(data => {
         res.send({
-          ret: data,
-          code: 200
+          code: 200,
+          ret: data
         });
       })
       .catch(err => {
+        console.error(err);
         res.send({
-          error: 4004,
-          message: '数据查询错误,请重试',
-          err
+          code: 5001,
+          msg: '对不起，数据查询错误,请重试'
         });
       });
   }
