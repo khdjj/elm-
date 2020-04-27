@@ -11,6 +11,7 @@ class Restaurant {
     this.getRestaurantList = this.getRestaurantList.bind(this);
     this.addRestaurantCategory = this.addRestaurantCategory.bind(this);
     this.getRestaurantDetail = this.getRestaurantDetail.bind(this);
+    this.upperShelf = this.upperShelf.bind(this);
   }
   async getRestaurant(req, res, next) {
     restDao
@@ -142,6 +143,25 @@ class Restaurant {
         });
       });
   }
+
+  upperShelf(req, res, next) {
+    const { id, status } = req.body;
+    restDao
+      .upperShelf(id, status)
+      .then(doc => {
+        res.send({
+          ret: 1,
+          data: doc
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        res.send({
+          error: 4004,
+          msg: err
+        });
+      });
+  }
 }
 
 const restaurant = new Restaurant();
@@ -152,5 +172,6 @@ module.exports = {
   getRestaurantList: restaurant.getRestaurantList,
   addRestaurantCategory: restaurant.addRestaurantCategory,
   getRestaurantDetail: restaurant.getRestaurantDetail,
-  updateRestaurant: restaurant.updateRestaurant
+  updateRestaurant: restaurant.updateRestaurant,
+  upperShelf:restaurant.upperShelf,
 };

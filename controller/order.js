@@ -8,6 +8,16 @@ class Order {
     this.getUserOrderList = this.getUserOrderList.bind(this);
     this.changeOrderStatus = this.changeOrderStatus.bind(this);
     this.getOrderDetail = this.getOrderDetail.bind(this);
+    this.getBusinessOrderList = this.getBusinessOrderList.bind(this);
+    this.replyCommend = this.replyCommend.bind(this);
+    this.getMonthSales = this.getMonthSales.bind(this);
+    // this.getSalesData = this.getSalesData.bind(this);
+    // this.statistics = this.statistics.bind(this);
+
+    // 1、获取每个月的订单金额
+    // 2、获取当天的好评数
+    //3、获取当天的差评数
+    // 4、获取今日销售额
   }
 
   async saveUserOrder(req, res, next) {
@@ -59,7 +69,7 @@ class Order {
         });
       })
       .catch(err => {
-        console.error(err)
+        console.error(err);
         res.send({
           code: 5001,
           msg: '对不起,服务器错误'
@@ -67,7 +77,7 @@ class Order {
       });
   }
   getOrderDetail(req, res, next) {
-    const { id } = req.query;
+    const { id, offset, limit } = req.query;
     dao
       .getOrderDetail(id)
       .then(data => {
@@ -77,13 +87,96 @@ class Order {
         });
       })
       .catch(err => {
-        console.error(err)
+        console.error(err);
         res.send({
           code: 5001,
           msg: '对不起,服务器错误'
         });
       });
   }
+
+  getBusinessOrderList(req, res, next) {
+    let { offset, limit, search } = req.query;
+    const id = getUser.getId(req);
+    offset = Number(offset) || 0;
+    limit = Number(limit) || 8;
+    dao
+      .getBusinessOrderList(id, offset, limit, search)
+      .then(data => {
+        res.send({
+          code: 200,
+          ret: data
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        res.send({
+          code: 5001,
+          msg: '对不起,服务器错误'
+        });
+      });
+  }
+
+  replyCommend(req, res, next) {
+    const { id, reply } = req.body;
+    console.error(req.body);
+    dao
+      .saveReplyCommend(id, reply)
+      .then(data => {
+        res.send({
+          code: 200,
+          ret: data
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        res.send({
+          code: 5001,
+          msg: '对不起,服务器错误'
+        });
+      });
+  }
+
+  getMonthSales(req, res, next) {
+    const { id } = req.query;
+    dao
+      .getMonthSales(id)
+      .then(data => {
+        console.error(data);
+        res.send({
+          code: 200,
+          ret: data
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        res.send({
+          code: 5001,
+          msg: '对不起,服务器错误'
+        });
+      });
+  }
+
+  //   getSalesData(req, res, next) {
+  //     const { id } = req.query;
+  //     console.error(id)
+  //     dao
+  //       .getSalesData(id)
+  //       .then(data => {
+  //         console.error(data);
+  //         res.send({
+  //           code: 200,
+  //           ret: data
+  //         });
+  //       })
+  //       .catch(err => {
+  //         console.error(err);
+  //         res.send({
+  //           code: 5001,
+  //           msg: '对不起,服务器错误'
+  //         });
+  //       });
+  //   }
 }
 
 const order = new Order();
@@ -91,5 +184,9 @@ module.exports = {
   saveUserOrder: order.saveUserOrder,
   getUserOrderList: order.getUserOrderList,
   changeOrderStatus: order.changeOrderStatus,
-  getOrderDetail: order.getOrderDetail
+  getOrderDetail: order.getOrderDetail,
+  getBusinessOrderList: order.getBusinessOrderList,
+  replyCommend: order.replyCommend,
+  getMonthSales: order.getMonthSales
+  // getSalesData: order.getSalesData
 };

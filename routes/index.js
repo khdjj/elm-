@@ -4,6 +4,7 @@ let routerUser = require('./user'),
   routerBusiness = require('./business'),
   routerUpload = require('./upload'),
   routerFood = require('./food'),
+  routerCommend = require('./commend'),
   routerRestaurant = require('./restaurant');
 
 exports.routes = app => {
@@ -14,5 +15,6 @@ exports.routes = app => {
   app.use('/business', routerBusiness.router);
   app.use('/upload', routerUpload.router);
   app.use('/food', routerFood.router);
+  app.use('/commend', routerCommend.router);
 
 };

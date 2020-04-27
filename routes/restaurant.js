@@ -9,5 +9,6 @@ router.get('/shopping/v3/list',restController.getRestaurantList)
 router.post('/food/v3/add/category',restController.addRestaurantCategory)
 router.post('/food/v3/add/category',restController.addRestaurantCategory)
 router.get('/v3/detail',restController.getRestaurantDetail),
-router.post('/v3/update',restController.updateRestaurant)
+router.post('/v3/update',restController.updateRestaurant),
+router.post('/v2/status',restController.upperShelf),
 exports.router = router

@@ -70,7 +70,7 @@ const RestaurantSchema = new Schema({
   posters: Array,
   promotion_info: String, //公告
   qualification: Array, //营业资质
-  rating: { type: Number, default: 0 },
+  rating: { type: Number, default: 5 },
   rating_count: { type: Number, default: 0 },
   regular_customer_count: Number,
   restaurant_info: Schema.Types.Mixed,

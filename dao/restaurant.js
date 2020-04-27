@@ -29,7 +29,6 @@ exports.getRestaurantListByParams = async function (data) {
   } = data;
   const reg = new RegExp(search);
   const location = [Number(longitude), Number(latitude)];
-  console.error(location, Number(offset), Number(limit));
   if (!search) {
     return await RestModel.find({
       location: {
@@ -38,7 +37,8 @@ exports.getRestaurantListByParams = async function (data) {
           $minDistance: 1000,
           $maxDistance: 5000
         }
-      }
+      },
+      status: 1
     })
       .skip(Number(offset))
       .limit(Number(limit));
@@ -156,6 +156,25 @@ exports.updateRestaurant = async function (id, data) {
       {
         $set: { ...data },
         $push: { qualification: data.qualify, albums: data.alb }
+      },
+      (err, doc) => {
+        if (err) {
+          reject(err);
+          console.error('对不起，修改餐饮数据错误');
+        } else {
+          resolve(doc);
+        }
+      }
+    );
+  });
+};
+
+exports.upperShelf = async function (id, status) {
+  return new Promise((resolve, reject) => {
+    RestModel.updateOne(
+      { _id: id },
+      {
+        $set: { status }
       },
       (err, doc) => {
         if (err) {
