@@ -4,7 +4,7 @@ var RestModel = require('../models/restaurant'),
 
 exports.save = async function (data) {
   var restaurant = new RestModel({
-    ...data
+    ...data,
   });
   try {
     //去重
@@ -22,10 +22,10 @@ exports.getRestaurantListByParams = async function (data) {
     extra_filters,
     limit = 8,
     offset = 0,
-    rank_id,
     search,
+    key,
     latitude,
-    longitude
+    longitude,
   } = data;
   const reg = new RegExp(search);
   const location = [Number(longitude), Number(latitude)];
@@ -35,12 +35,13 @@ exports.getRestaurantListByParams = async function (data) {
         $nearSphere: {
           $geometry: { type: 'Point', coordinates: location },
           $minDistance: 1000,
-          $maxDistance: 5000
-        }
+          $maxDistance: 5000,
+        },
       },
-      status: 1
+      status: 1,
     })
       .skip(Number(offset))
+      .sort(key)
       .limit(Number(limit));
   } else if (search) {
     return await RestModel.find({
@@ -49,9 +50,9 @@ exports.getRestaurantListByParams = async function (data) {
         $nearSphere: {
           $geometry: { type: 'Point', coordinates: location },
           $minDistance: 1000,
-          $maxDistance: 5000
-        }
-      }
+          $maxDistance: 5000,
+        },
+      },
     });
   }
 };
@@ -61,14 +62,14 @@ exports.saveRestaurant = async function (id, data) {
     ...data,
     businessId: id,
     tag: 1,
-    createAt: new Date()
+    createAt: new Date(),
   });
   try {
     return await restaurant.save();
   } catch (err) {
     return {
       error: 5002,
-      msg: '对不起,插入数据错误'
+      msg: '对不起,插入数据错误',
     };
   }
 };
@@ -90,14 +91,14 @@ exports.addRestaurantCategory = async function (id, name, desc) {
   const menu = new MenuModel({
     rstId: id,
     name,
-    name_desc: desc
+    name_desc: desc,
   });
   try {
     return await menu.save();
   } catch (err) {
     return {
       error: 5002,
-      msg: '对不起,数据库错误'
+      msg: '对不起,数据库错误',
     };
   }
 };
@@ -123,9 +124,9 @@ exports.getShopDetail = async function (name) {
         from: 'menus',
         localField: '_id',
         foreignField: 'rstId',
-        as: 'menus'
-      }
-    }
+        as: 'menus',
+      },
+    },
   ]);
   let rst = {};
   if (doc.length > 0) rst = doc[0];
@@ -137,7 +138,7 @@ exports.getShopDetail = async function (name) {
     const food = await foodDao.findFoodByMenus(foods);
     docMenus.push({
       ...menus[i],
-      foods: food
+      foods: food,
     });
   }
   delete rst.menus;
@@ -145,7 +146,7 @@ exports.getShopDetail = async function (name) {
   console.error(docMenus);
   return {
     menus: docMenus,
-    rst: docRst
+    rst: docRst,
   };
 };
 
@@ -155,7 +156,7 @@ exports.updateRestaurant = async function (id, data) {
       { _id: id },
       {
         $set: { ...data },
-        $push: { qualification: data.qualify, albums: data.alb }
+        $push: { qualification: data.qualify, albums: data.alb },
       },
       (err, doc) => {
         if (err) {
@@ -174,7 +175,26 @@ exports.upperShelf = async function (id, status) {
     RestModel.updateOne(
       { _id: id },
       {
-        $set: { status }
+        $set: { status },
+      },
+      (err, doc) => {
+        if (err) {
+          reject(err);
+          console.error('对不起，修改餐饮数据错误');
+        } else {
+          resolve(doc);
+        }
+      }
+    );
+  });
+};
+
+exports.sort = async function (key) {
+  return new Promise((resolve, reject) => {
+    RestModel.find(
+      { _id: id },
+      {
+        $set: { status },
       },
       (err, doc) => {
         if (err) {

@@ -18,7 +18,7 @@ const OrderSchema = new Schema({
   money: Schema.Types.Number,
   creatAt: Schema.Types.Date,
   restaurant:Schema.Types.Mixed,
-  status: { type: Number, default: 0 } //订单状态  0 初始状态 1 订单已完成 2 订单已评价 -1 订单已取消
+  status: { type: Number, default: 0 } //订单状态  0 初始状态 1 订单已完成 2 订单已评价 -1 订单已取消  3订单已自动评价
 });
 
 const Order = mongoose.model('order', OrderSchema);

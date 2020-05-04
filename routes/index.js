@@ -5,6 +5,7 @@ let routerUser = require('./user'),
   routerUpload = require('./upload'),
   routerFood = require('./food'),
   routerCommend = require('./commend'),
+  routerExport = require('./export'),
   routerRestaurant = require('./restaurant');
 
 exports.routes = app => {
@@ -16,5 +17,5 @@ exports.routes = app => {
   app.use('/upload', routerUpload.router);
   app.use('/food', routerFood.router);
   app.use('/commend', routerCommend.router);
-
+  app.use('/export', routerExport.router);
 };

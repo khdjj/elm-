@@ -1,30 +1,67 @@
 var OrderModel = require('../models/order'),
+  mongoose = require('mongoose'),
+  moment = require('moment'),
   RestaurantModel = require('../models/restaurant'),
   CommendModal = require('../models/commend');
 
 exports.saveOrderModel = async function (data) {
   var order = new OrderModel({
-    ...data
+    ...data,
   });
   try {
-    return await order.save();
+    await order.save();
+    /**
+     * 评分计算
+     */
+    const { rstId } = data;
+    return changeRstRate(rstId);
   } catch (err) {
     console.error(err);
     return err;
   }
 };
 
-exports.searchUserOrderByUserId = async function (id) {
-  return new Promise((resolve, reject) => {
-    OrderModel.find({ userId: id }, (err, doc) => {
-      if (err) {
-        console.error('数据库查询用户订单列表错误');
-      } else {
-        console.error(doc);
-        resolve(doc);
-      }
-    });
+changeRstRate = async (rstId) => {
+  const rate = await CommendModal.aggregate([
+    {
+      $match: {
+        rstId: rstId,
+      },
+    },
+    {
+      $group: {
+        _id: '$rating',
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+  let total = 0;
+  rate.forEach((r) => {
+    total += r.count;
   });
+  const obj = ArrayToObject(rate, total);
+  let rstRate = 0;
+  Object.keys(obj).forEach((o) => {
+    rstRate += Number(o) * Number(obj[o]);
+  });
+  return await RestaurantModel.updateOne(
+    { _id: data.rstId },
+    { $set: { rating: rstRate } }
+  );
+};
+
+function ArrayToObject(arr, total) {
+  const obj = {};
+  total = total === 0 ? 1 : total;
+  arr.forEach((arr) => {
+    obj[arr._id] = (arr.count / total).toFixed(2);
+    console.error((arr.count / total).toFixed(2));
+  });
+  return obj;
+}
+
+exports.searchUserOrderByUserId = async function (id, offset, limit) {
+  return await OrderModel.find({ userId: id }).skip(offset).limit(limit);
 };
 
 exports.changeOrderStatus = async function (id, status) {
@@ -35,62 +72,122 @@ exports.getOrderDetail = async function (id) {
   return await OrderModel.findOne({ _id: id });
 };
 
-exports.getBusinessOrderList = async function (
-  id,
-  offset = 0,
-  limit = 8,
-  search
-) {
+exports.getBusinessAllOrderList = async function (id) {
   let restaurantId = [];
-  const reg = new RegExp(search);
   restaurantId = await RestaurantModel.find(
     {
-      $and: [{ businessId: id }, { name: { $regex: reg } }]
+      $and: [{ businessId: id }],
     },
     {
-      _id: 1
+      _id: 1,
     }
   );
-
-  restaurantId = restaurantId.map(rst => {
+  restaurantId = restaurantId.map((rst) => {
     return rst._id.toString();
   });
-  const total = await OrderModel.find({
-    'restaurant.id': { $in: restaurantId }
-  }).count();
   const order = await OrderModel.aggregate([
     {
-      $match: { 'restaurant.id': { $in: restaurantId } }
+      $match: {
+        'restaurant.id': { $in: restaurantId },
+        status: { $ne: 0 },
+      },
     },
     {
       $lookup: {
         from: 'comments',
         localField: '_id',
         foreignField: 'orderId',
-        as: 'comments'
-      }
-    },
-    {
-      $limit: limit
-    },
-    {
-      $skip: offset
+        as: 'comments',
+      },
     },
     {
       $project: {
         food: 0,
-        address: 0
-      }
+        address: 0,
+      },
+    },
+  ]);
+  return order;
+};
+
+exports.getBusinessOrderList = async function (
+  id,
+  offset = 0,
+  limit = 8,
+  search = '',
+  startTime,
+  endTime
+) {
+  let restaurantId = [];
+  search = search.replace(
+    /(\+|\-|\&|\||\!|\(|\)|\{|\}|\[|\]|\^|\”|\~|\*|\?|\:|\\)/g,
+    function ($0) {
+      return '\\' + $0;
     }
+  );
+  const reg = new RegExp(search);
+  restaurantId = await RestaurantModel.find(
+    {
+      $and: [{ businessId: id }, { name: { $regex: reg } }],
+    },
+    {
+      _id: 1,
+    }
+  );
+  console.error(startTime, endTime);
+  let query = {};
+  if (startTime && endTime) {
+    query = {
+      creatAt: {
+        $gt: new Date(new Date(startTime).toISOString()),
+        $lt: new Date(new Date(endTime).toISOString()),
+      },
+    };
+  }
+  console.error('query', query);
+
+  restaurantId = restaurantId.map((rst) => {
+    return rst._id.toString();
+  });
+  const total = await OrderModel.find({
+    'restaurant.id': { $in: restaurantId },
+  }).count();
+  const order = await OrderModel.aggregate([
+    {
+      $match: {
+        'restaurant.id': { $in: restaurantId },
+        ...query,
+      },
+    },
+    {
+      $lookup: {
+        from: 'comments',
+        localField: '_id',
+        foreignField: 'orderId',
+        as: 'comments',
+      },
+    },
+    {
+      $limit: limit,
+    },
+    {
+      $skip: offset,
+    },
+    {
+      $project: {
+        food: 0,
+        address: 0,
+      },
+    },
   ]);
   console.error(total, offset, limit);
   return {
     data: order,
     pagination: {
       total,
-      current: offset,
-      pageSize: limit
-    }
+      current: total / limit,
+      pageSize: limit,
+    },
   };
 };
 
@@ -111,21 +208,50 @@ exports.saveReplyCommend = async function (id, reply) {
 exports.getMonthSales = async function (id) {
   const month = await OrderModel.aggregate([
     {
-      $match: { 'restaurant.id': id }
+      $match: { 'restaurant.id': id },
     },
     {
       $group: {
         _id: { $dateToString: { format: '%Y-%m', date: '$creatAt' } },
-        count: { $sum: '$money' }
-      }
+        count: { $sum: '$money' },
+      },
     },
-    { $sort: { _id: 1 } }
+    { $sort: { _id: 1 } },
   ]);
   const salesData = await getSalesData(id);
   return {
     month,
-    salesData
+    salesData,
   };
+};
+
+// 自动评分
+exports.autoRating = async function () {
+  const orders = await OrderModel.find({});
+  orders.forEach((o) => {
+    // 超过1天
+    if (moment() > moment(o.creatAt).add(23, 'h')) {
+      CommendModal.updateOne(
+        { orderId: o._id },
+        { $set: { rating: 5 } },
+        (err, doc) => {
+          if (!err) {
+            changeRstRate(o.restaurant.id);
+          }
+        }
+      );
+    }
+  });
+};
+
+exports.autoChangeOrderStatus = async function () {
+  const orders = await OrderModel.find({});
+  orders.forEach((o) => {
+    // 超过3小时订单状态自动完成
+    if (moment() > moment(o.creatAt).add(3, 'h')) {
+      CommendModal.updateOne({ orderId: o._id }, { $set: { status: 3 } });
+    }
+  });
 };
 
 const getSalesData = async function (id) {
@@ -142,23 +268,23 @@ const getSalesData = async function (id) {
         from: 'comments',
         localField: '_id',
         foreignField: 'orderId',
-        as: 'comments'
-      }
+        as: 'comments',
+      },
     },
     {
       $project: {
         restaurant: 1,
         'comments.rating': 1,
         money: 1,
-        year: { $substr: ['$creatAt', 0, 10] }
-      }
+        year: { $substr: ['$creatAt', 0, 10] },
+      },
     },
     {
       $match: {
         year: `${year}-${month}-${day}`,
-        'restaurant.id': id
-      }
-    }
+        'restaurant.id': id,
+      },
+    },
   ]);
 
   const food = await OrderModel.aggregate([
@@ -168,22 +294,22 @@ const getSalesData = async function (id) {
       $group: {
         _id: '$food.name',
         count: {
-          $sum: 1
-        }
-      }
+          $sum: 1,
+        },
+      },
     },
     {
-      $limit: 15
+      $limit: 15,
     },
     {
-      $sort: { count: -1 }
-    }
+      $sort: { count: -1 },
+    },
   ]);
 
   let good = 0;
   let bad = 0;
   let sales = 0;
-  order.forEach(o => {
+  order.forEach((o) => {
     sales += o.money;
     const { comments } = o;
     if (comments.length > 0) {
@@ -201,21 +327,21 @@ const getSalesData = async function (id) {
         money: 1,
         restaurant: 1,
         way: 1,
-        year: { $substr: ['$creatAt', 0, 10] }
-      }
+        year: { $substr: ['$creatAt', 0, 10] },
+      },
     },
     {
       $match: {
         year: `${year}-${month}-${day}`,
-        'restaurant.id': id
-      }
+        'restaurant.id': id,
+      },
     },
     {
       $group: {
         _id: '$way',
-        count: { $sum: '$money' }
-      }
-    }
+        count: { $sum: '$money' },
+      },
+    },
   ]);
 
   return {
@@ -224,7 +350,7 @@ const getSalesData = async function (id) {
     sales,
     ordernum: order.length,
     food,
-    type
+    type,
   };
 };
 
@@ -264,11 +390,37 @@ const getSalesData = async function (id) {
 //   }
 // ])
 
-
 // db.getCollection('orders').aggregate([
 //   {
 //     $match: { 'restaurant.id': { $in: ['5e7ef7dd6500d6200c7745ed'] },
 //     creatAt:{"$gt":'2020-03-20',"$lt":'2020-03-40'} }
+//   },
+//   {
+//     $lookup: {
+//       from: 'comments',
+//       localField: '_id',
+//       foreignField: 'orderId',
+//       as: 'comments'
+//     }
+//   },
+//   {
+//     $limit: 10
+//   },
+//   {
+//     $skip: 0
+//   },
+//   {
+//     $project: {
+//       food: 0,
+//       address: 0
+//     }
+//   }
+// ]);
+
+// db.getCollection('orders').aggregate([
+//   {
+//     $match: { 'restaurant.id': { $in: ['5e7ef7dd6500d6200c7745ed'] },
+//     creatAt:{"$gt":new Date(new Date('2020-04-19').toISOString())} }
 //   },
 //   {
 //     $lookup: {

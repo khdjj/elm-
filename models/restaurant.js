@@ -60,10 +60,10 @@ const RestaurantSchema = new Schema({
     rules: [
       {
         fee: Number,
-        price: Number
-      }
+        price: Number,
+      },
     ],
-    tips: String
+    tips: String,
   },
   platform: Number,
   category: Array, //食品分类
@@ -75,11 +75,11 @@ const RestaurantSchema = new Schema({
   regular_customer_count: Number,
   restaurant_info: Schema.Types.Mixed,
   scheme: String,
-  status: Number,
+  status: { type: Number, default: 0 },
   target_tag_path: Schema.Types.Mixed,
   type: Number,
   createAt: Schema.Types.Date,
-  businessId: { type: Schema.Types.ObjectId, ref: 'businessModels' } //这里即为子表的外键，关联主表。  ref后的blog代表的是主表blog的Model。
+  businessId: { type: Schema.Types.ObjectId, ref: 'businessModels' }, //这里即为子表的外键，关联主表。  ref后的blog代表的是主表blog的Model。
 });
 
 const Restaurant = mongoose.model('Restaurant', RestaurantSchema);

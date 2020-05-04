@@ -43,8 +43,9 @@ class Order {
 
   async getUserOrderList(req, res, next) {
     const _id = getUser.getId(req);
+    const {offset,limit} = req.query;
     dao
-      .searchUserOrderByUserId(_id)
+      .searchUserOrderByUserId(_id,Number(offset),Number(limit))
       .then(data => {
         res.send({
           ret: data,
@@ -52,6 +53,7 @@ class Order {
         });
       })
       .catch(err => {
+        console.error(err)
         res.send({
           error: err,
           msg: '对不起，服务器错误'
@@ -96,12 +98,12 @@ class Order {
   }
 
   getBusinessOrderList(req, res, next) {
-    let { offset, limit, search } = req.query;
+    let { offset, limit, search, startTime, endTime } = req.query;
     const id = getUser.getId(req);
     offset = Number(offset) || 0;
     limit = Number(limit) || 8;
     dao
-      .getBusinessOrderList(id, offset, limit, search)
+      .getBusinessOrderList(id, offset, limit, search, startTime, endTime)
       .then(data => {
         res.send({
           code: 200,
