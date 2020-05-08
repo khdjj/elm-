@@ -2,6 +2,7 @@ var OrderModel = require('../models/order'),
   mongoose = require('mongoose'),
   moment = require('moment'),
   RestaurantModel = require('../models/restaurant'),
+  FoodModal = require('../models/food'),
   CommendModal = require('../models/commend');
 
 exports.saveOrderModel = async function (data) {
@@ -13,8 +14,32 @@ exports.saveOrderModel = async function (data) {
     /**
      * 评分计算
      */
-    const { rstId } = data;
-    return changeRstRate(rstId);
+    const { food = [], restaurant = {} } = data;
+    if (!restaurant.recent_order_num) restaurant.recent_order_num = 0;
+    console.error(restaurant.id);
+    RestaurantModel.updateOne(
+      { _id: mongoose.Types.ObjectId(restaurant.id) },
+      { $set: { recent_order_num: restaurant.recent_order_num + 1 } },
+      (err, doc) => {
+        console.error('修改餐饮数据', doc);
+        console.error(err);
+      }
+    );
+    food.forEach((f) => {
+      if (!f.month_sales) f.month_sales = 0;
+      console.error(f._id);
+      FoodModal.updateOne(
+        {
+          _id: mongoose.Types.ObjectId(f._id),
+        },
+        {
+          $set: { month_sales: f.month_sales + f.num },
+        },
+        (err, doc) => {
+          console.error('修改食物数据');
+        }
+      );
+    });
   } catch (err) {
     console.error(err);
     return err;
@@ -45,7 +70,7 @@ changeRstRate = async (rstId) => {
     rstRate += Number(o) * Number(obj[o]);
   });
   return await RestaurantModel.updateOne(
-    { _id: data.rstId },
+    { _id: rstId },
     { $set: { rating: rstRate } }
   );
 };
@@ -231,16 +256,9 @@ exports.autoRating = async function () {
   orders.forEach((o) => {
     // 超过1天
     if (moment() > moment(o.creatAt).add(23, 'h')) {
-      CommendModal.updateOne(
-        { orderId: o._id },
-        { $set: { rating: 5 } },
-        (err, doc) => {
-          if (!err) {
-            changeRstRate(o.restaurant.id);
-          }
-        }
-      );
+      CommendModal.updateOne({ orderId: o._id }, { $set: { rating: 5 } });
     }
+    changeRstRate(o.restaurant.id);
   });
 };
 

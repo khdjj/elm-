@@ -25,10 +25,10 @@ class Export {
       });
       const uuid = utils.random();
       await fs.writeFileSync(`./public/excel/${uuid}_order.xlsx`, exlBuf2);
-      res.send({
-        code: 200,
-        fileName: `${uuid}_order.xlsx`,
-      });
+      const content = fs.readFileSync(`./public/excel/${uuid}_order.xlsx`);
+      res.setHeader('Content-Type','application/octet-stream')
+      res.write(content)
+      res.end();
     } catch (err) {
       console.error(err);
       res.send({

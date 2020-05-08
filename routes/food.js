@@ -7,6 +7,7 @@ router.post('/v4/save', foodController.saveFood);
 router.get('/v4/list', foodController.getFoodList);
 router.get('/v4/detail', foodController.getFoodDetail);
 router.post('/v4/update', foodController.updateFood);
+router.post('/v4/delete',foodController.deleteFood)
 
 
 exports.router = router;

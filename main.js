@@ -46,11 +46,13 @@ app.listen(config.port, () => {
 function scheduleCronstyle() {
   // 每23个小时后回滚数据库，将未评价的订单进行五星好评
   schedule.scheduleJob('* * 23 * * *', function () {
+    console.error("autoRating")
     dao.autoRating();
   });
 
   // 每3个小时回滚数据库，将超时1小时未完成订单的数据进行自动完成
   schedule.scheduleJob('* * 3 * * *', function () {
+    console.error("autoChangeOrderStatus")
     dao.autoChangeOrderStatus();
   });
 }

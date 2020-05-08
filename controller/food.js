@@ -9,22 +9,41 @@ class Food {
     this.saveFood = this.saveFood.bind(this);
     this.getFoodList = this.getFoodList.bind(this);
     this.updateFood = this.updateFood.bind(this);
+    this.deleteFood = this.deleteFood.bind(this);
   }
 
   async getFoodCategory(req, res, next) {
     const { id } = req.body;
     dao
       .getFoodCategory(id)
-      .then(data => {
+      .then((data) => {
         res.send({
           data,
-          msg: 'ok'
+          msg: 'ok',
         });
       })
-      .catch(err => {
+      .catch((err) => {
         res.send({
           error: err,
-          msg: '对不起，服务器错误'
+          msg: '对不起，服务器错误',
+        });
+      });
+  }
+
+  async deleteFood(req, res, next) {
+    const { id, menusId } = req.body;
+    dao
+      .deleteFood(id, menusId)
+      .then((data) => {
+        res.send({
+          data,
+          msg: 'ok',
+        });
+      })
+      .catch((err) => {
+        res.send({
+          error: err,
+          msg: '对不起，服务器错误',
         });
       });
   }
@@ -34,16 +53,16 @@ class Food {
     console.error(req.body);
     dao
       .saveFood(id, categoryId, data)
-      .then(data => {
+      .then((data) => {
         res.send({
           data,
-          msg: 'ok'
+          msg: 'ok',
         });
       })
-      .catch(err => {
+      .catch((err) => {
         res.send({
           error: err,
-          msg: '对不起，服务器错误'
+          msg: '对不起，服务器错误',
         });
       });
   }
@@ -53,16 +72,16 @@ class Food {
     console.error(id, req.body, req.query);
     dao
       .getFoodList(id)
-      .then(data => {
+      .then((data) => {
         res.send({
           data,
-          msg: 'ok'
+          msg: 'ok',
         });
       })
-      .catch(err => {
+      .catch((err) => {
         res.send({
           error: err,
-          msg: '对不起，服务器错误'
+          msg: '对不起，服务器错误',
         });
       });
   }
@@ -72,16 +91,16 @@ class Food {
     console.error(id);
     dao
       .getFoodDetail(id)
-      .then(data => {
+      .then((data) => {
         res.send({
           data,
-          msg: 'ok'
+          msg: 'ok',
         });
       })
-      .catch(err => {
+      .catch((err) => {
         res.send({
           error: err,
-          msg: '对不起，服务器错误'
+          msg: '对不起，服务器错误',
         });
       });
   }
@@ -90,16 +109,16 @@ class Food {
     const { id, ...restData } = req.body;
     foodDao
       .updateFood(id, restData)
-      .then(data => {
+      .then((data) => {
         res.send({
           data,
-          msg: 'ok'
+          msg: 'ok',
         });
       })
-      .catch(err => {
+      .catch((err) => {
         res.send({
           error: err,
-          msg: '对不起，服务器错误'
+          msg: '对不起，服务器错误',
         });
       });
   }
@@ -111,5 +130,6 @@ module.exports = {
   saveFood: food.saveFood,
   getFoodList: food.getFoodList,
   getFoodDetail: food.getFoodDetail,
-  updateFood:food.updateFood,
+  updateFood: food.updateFood,
+  deleteFood: food.deleteFood,
 };

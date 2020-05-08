@@ -19,14 +19,14 @@ class Restaurant {
       .then((data = {}) => {
         res.send({
           code: 200,
-          ret: data
+          ret: data,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         res.send({
           error: 4004,
-          msg: '数据查询错误,请重试'
+          msg: '数据查询错误,请重试',
         });
       });
   }
@@ -35,52 +35,61 @@ class Restaurant {
     const { name } = req.query;
     restDao
       .getShopDetail(name)
-      .then(data => {
+      .then((data) => {
         res.send({
           code: 200,
-          ret: data
+          ret: data,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         res.send({
           code: 5001,
-          msg: '对不起，数据查询错误,请重试'
+          msg: '对不起，数据查询错误,请重试',
         });
       });
   }
 
   saveRestaruant(req, res, next) {
     const _id = getUser.getId(req);
-    restDao.saveRestaurant(_id, req.body).then(doc => {
-      if (doc.error) {
-        res.send({
-          ...doc
-        });
-      } else {
-        res.send({
-          ret: 1,
-          code: 200
-        });
-      }
-    });
+    try{
+      restDao.saveRestaurant(_id, req.body).then((doc) => {
+        if (!doc.error) {
+          res.send({
+            ...doc,
+          });
+        } else {
+          res.send({
+            ret: 1,
+            code: 200,
+          });
+        }
+      });
+    }catch(e){
+      console.error(e);
+      res.send({
+        code:5002,
+        msg:'对不起，数据库错误 '
+      })
+    }
+   
   }
 
   getRestaurantList(req, res, next) {
     const _id = getUser.getId(req);
     restDao
       .getRestaurantList(_id)
-      .then(doc => {
+      .then((doc) => {
         res.send({
           ret: 1,
-          data: doc
+          data: doc,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         res.send({
           error: 4004,
-          msg: err
+          msg: err,
         });
       });
   }
@@ -90,17 +99,17 @@ class Restaurant {
     const { id, name, desc } = req.body;
     restDao
       .addRestaurantCategory(id, name, desc)
-      .then(doc => {
+      .then((doc) => {
         res.send({
           ret: 1,
-          data: doc
+          data: doc,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         res.send({
           error: 4004,
-          msg: err
+          msg: err,
         });
       });
   }
@@ -109,17 +118,17 @@ class Restaurant {
     const { id } = req.query;
     restDao
       .getRestaurantDetail(id)
-      .then(doc => {
+      .then((doc) => {
         res.send({
           ret: 1,
-          data: doc
+          data: doc,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         res.send({
           error: 4004,
-          msg: err
+          msg: err,
         });
       });
   }
@@ -129,17 +138,17 @@ class Restaurant {
 
     restDao
       .updateRestaurant(id, restData)
-      .then(doc => {
+      .then((doc) => {
         res.send({
           ret: 1,
-          data: doc
+          data: doc,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         res.send({
           error: 4004,
-          msg: err
+          msg: err,
         });
       });
   }
@@ -148,17 +157,17 @@ class Restaurant {
     const { id, status } = req.body;
     restDao
       .upperShelf(id, status)
-      .then(doc => {
+      .then((doc) => {
         res.send({
           ret: 1,
-          data: doc
+          data: doc,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         res.send({
           error: 4004,
-          msg: err
+          msg: err,
         });
       });
   }
@@ -173,5 +182,5 @@ module.exports = {
   addRestaurantCategory: restaurant.addRestaurantCategory,
   getRestaurantDetail: restaurant.getRestaurantDetail,
   updateRestaurant: restaurant.updateRestaurant,
-  upperShelf:restaurant.upperShelf,
+  upperShelf: restaurant.upperShelf,
 };

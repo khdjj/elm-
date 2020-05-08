@@ -13,38 +13,38 @@ class Commend {
     dao
       .saveCommennd({
         ...req.body,
-        userId: _id
+        userId: _id,
       })
-      .then(data => {
+      .then((data) => {
         console.error(data);
         res.send({
           ret: data,
-          msg: 'ok'
+          msg: 'ok',
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         res.send({
           error: err,
-          msg: '对不起，服务器错误'
+          msg: '对不起，服务器错误',
         });
       });
   }
   async getRestaurantCommend(req, res, next) {
-    const {id}  = req.query;
+    const { id, offset, limit } = req.query;
     dao
-      .getRestaurantCommend(id)
-      .then(data => {
+      .getRestaurantCommend(id, offset, limit)
+      .then((data) => {
         res.send({
           ret: data,
-          msg: 'ok'
+          msg: 'ok',
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         res.send({
           error: err,
-          msg: '对不起，服务器错误'
+          msg: '对不起，服务器错误',
         });
       });
   }
@@ -53,5 +53,5 @@ class Commend {
 const commend = new Commend();
 module.exports = {
   saveCommend: commend.saveCommend,
-  getRestaurantCommend: commend.getRestaurantCommend
+  getRestaurantCommend: commend.getRestaurantCommend,
 };

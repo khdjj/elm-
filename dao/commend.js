@@ -3,7 +3,7 @@ var CommendModel = require('../models/commend'),
 
 exports.saveCommennd = async function (data) {
   var commend = new CommendModel({
-    ...data
+    ...data,
   });
   try {
     await commend.save();
@@ -14,15 +14,6 @@ exports.saveCommennd = async function (data) {
   }
 };
 
-
-exports.getRestaurantCommend = function (id) {
-  return new Promise((resolve,reject)=>{
-    CommendModel.find({rstId:id},(err,doc)=>{
-      if(err){
-        reject(err)
-      }else{
-        resolve(doc)
-      }
-    })
-  })
-}
+exports.getRestaurantCommend = async function (id, offset = 0, limit = 8) {
+  return await CommendModel.find({ rstId: id }).limit(limit).skip(offset);
+};

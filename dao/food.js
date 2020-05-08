@@ -41,6 +41,8 @@ exports.findFoodByMenus = async function (foods) {
   return await FoodModel.find({ _id: { $in: foods } });
 };
 
+
+
 //其他用途
 exports.getAll = function () {
   return new Promise((resolve, reject) => {

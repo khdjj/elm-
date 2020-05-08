@@ -1,9 +1,9 @@
 var MenuModel = require('../models/menu'),
   FoodModel = require('../models/food');
 
-exports.save = async function(data) {
+exports.save = async function (data) {
   var menu = new MenuModel({
-    ...data
+    ...data,
   });
   try {
     //去重
@@ -17,7 +17,12 @@ exports.save = async function(data) {
   }
 };
 
-exports.getFoodCategory = async function(id) {
+exports.deleteFood = async function (id, menusId) {
+  MenuModel.updateOne({ _id: menusId }, { $pull: { food: id } });
+  return await FoodModel.deleteOne({ _id: id });
+};
+
+exports.getFoodCategory = async function (id) {
   return new Promise((resolve, reject) => {
     MenuModel.find({ rstId: id }, { name: 1, name_desc: 1 }, (err, doc) => {
       if (err) {
@@ -30,13 +35,14 @@ exports.getFoodCategory = async function(id) {
   });
 };
 
-exports.saveFood = async function(id, categoryId, data) {
+exports.saveFood = async function (id, categoryId, data) {
   const food = new FoodModel({
     ...data,
-    restaurant_id:id,
+    restaurant_id: id,
+    menusId: categoryId,
   });
   const doc = await food.save();
-  console.error(doc)
+  console.error(doc);
   if (doc && Object.keys(doc).length > 0) {
     return await MenuModel.updateOne(
       { _id: categoryId, rstId: id },
@@ -45,7 +51,7 @@ exports.saveFood = async function(id, categoryId, data) {
   }
 };
 
-exports.getFoodList = async function(id) {
+exports.getFoodList = async function (id) {
   return new Promise((resolve, reject) => {
     FoodModel.find({ restaurant_id: id }, (err, doc) => {
       if (err) {
@@ -58,8 +64,7 @@ exports.getFoodList = async function(id) {
   });
 };
 
-
-exports.getFoodDetail = async function(id) {
+exports.getFoodDetail = async function (id) {
   return new Promise((resolve, reject) => {
     FoodModel.findOne({ _id: id }, (err, doc) => {
       if (err) {
@@ -72,13 +77,10 @@ exports.getFoodDetail = async function(id) {
   });
 };
 
-
-
-
 //其他用途
-exports.getAll = function() {
+exports.getAll = function () {
   return new Promise((resolve, reject) => {
-    FoodModel.find({},(err, doc) => {
+    FoodModel.find({}, (err, doc) => {
       if (err) {
         reject(err);
         console.error('对不起，修改餐饮数据错误');
@@ -91,15 +93,15 @@ exports.getAll = function() {
 
 //其他用途
 
-exports.saveAll = function(data) {
-  console.error("MenusaveALl")
+exports.saveAll = function (data) {
+  console.error('MenusaveALl');
   return new Promise((resolve, reject) => {
-    MenuModel.insertMany(data,(err,doc)=>{
-      if(err){
+    MenuModel.insertMany(data, (err, doc) => {
+      if (err) {
         reject(err);
-      }else{
-        console.error("保存菜单成功")
-        resolve(doc)
+      } else {
+        console.error('保存菜单成功');
+        resolve(doc);
       }
     });
   });

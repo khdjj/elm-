@@ -29,13 +29,15 @@ exports.getRestaurantListByParams = async function (data) {
   } = data;
   const reg = new RegExp(search);
   const location = [Number(longitude), Number(latitude)];
+  console.error(location)
+  console.error(data)
   if (!search) {
     return await RestModel.find({
       location: {
         $nearSphere: {
           $geometry: { type: 'Point', coordinates: location },
           $minDistance: 1000,
-          $maxDistance: 5000,
+          $maxDistance: 100000,
         },
       },
       status: 1,
@@ -44,16 +46,24 @@ exports.getRestaurantListByParams = async function (data) {
       .sort(key)
       .limit(Number(limit));
   } else if (search) {
+    console.error(search,reg)
     return await RestModel.find({
-      $or: [{ name: { $regex: reg } }, { category: { $regex: reg } }],
+      $or: [
+        { name: { $regex: reg } },
+        { category: { $elemMatch: { $regex: reg } } },
+      ],
       location: {
         $nearSphere: {
           $geometry: { type: 'Point', coordinates: location },
           $minDistance: 1000,
-          $maxDistance: 5000,
+          $maxDistance: 100000,
         },
       },
-    });
+      status: 1,
+    })
+      .skip(Number(offset))
+      .sort(key)
+      .limit(Number(limit));
   }
 };
 
@@ -62,16 +72,11 @@ exports.saveRestaurant = async function (id, data) {
     ...data,
     businessId: id,
     tag: 1,
+    location: [parseFloat(data.longitude), parseFloat(data.latitude)],
     createAt: new Date(),
   });
-  try {
-    return await restaurant.save();
-  } catch (err) {
-    return {
-      error: 5002,
-      msg: '对不起,插入数据错误',
-    };
-  }
+  console.error(data);
+  return await restaurant.save();
 };
 
 exports.getRestaurantList = async function (id) {
